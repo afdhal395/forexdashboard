@@ -48,7 +48,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md col">
+          <div class="col-md">
           <?php 
               $chart = new Chart;
               $chart->symbol="GBPUSD";
@@ -56,7 +56,7 @@
               $chart->generate();
             ?>
           </div>
-          <div class="col-md col">
+          <div class="col-md">
           <?php 
               $chart = new Chart;
               $chart->symbol="GBPUSD";
@@ -64,7 +64,7 @@
               $chart->generate();
             ?>
           </div>
-          <div class="col-md col">
+          <div class="col-md">
           <?php 
               $chart = new Chart;
               $chart->symbol="GBPUSD";
@@ -72,7 +72,7 @@
               $chart->generate();
             ?>
           </div>
-          <div class="col-md col">
+          <div class="col-md">
           <?php 
               $chart = new Chart;
               $chart->symbol="GBPUSD";
