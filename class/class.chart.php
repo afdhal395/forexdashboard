@@ -25,7 +25,7 @@ class Chart
   "locale": "en",
   "toolbar_bg": "#f1f3f6",
   "enable_publishing": false,
-  "hide_top_toolbar": true,
+  "hide_top_toolbar": false,
   "save_image": false,
   "container_id": "tradingview_5baed"
 }
