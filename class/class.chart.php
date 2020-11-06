@@ -10,7 +10,7 @@ class Chart
     <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div id="tradingview_5baed"></div>
-  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/EURUSD/" rel="noopener" target="_blank"><span class="blue-text">EURUSD Chart</span></a> by TradingView</div>
+  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/$this->symbol/" rel="noopener" target="_blank"><span class="blue-text">$this->symbol Chart</span></a> by TradingView</div>
   <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
   <script type="text/javascript">
   new TradingView.widget(
