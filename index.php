@@ -31,20 +31,7 @@ require 'class/class.chart.php';
         <div class="form-group row">
           <label class="col-sm-2 col-form-label" for="forexpair">Forex Pair</label>
           <div class="col-sm-3">
-            <select class="form-control" name="forexpair" id="forexpair" onchange="this.form.submit()">
-              <?php
-                $currencyList = array("EURUSD", "GBPUSD", "EURCHF", "EURGBP", "AUDUSD", "NZDUSD", "CHFJPY", "GBPJPY", "CADCHF", );
-                asort($currencyList);
-                
-                foreach ($currencyList as $pair) {
-                  if ($pair == $currencyselect) {
-                    echo "<option value='$pair' selected>$pair</option>";
-                  } else {
-                    echo "<option value='$pair'>$pair</option>";
-                  }
-                }
-                ?>
-            </select>
+          <input class="form-control" type="text" name="forexpair" id="forexpair" value="<?php echo $currencyselect ?>">
           </div>
           <div class="col-sm-2">
             <div class="form-check-inline">
