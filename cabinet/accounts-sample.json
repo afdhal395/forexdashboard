@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "name": "Owner",
+        "login": "login",
+        "password": "APIpassword"
+    },
+
+    {
+        "id": 2,
+        "name": "Owner2",
+        "login": "login",
+        "password": "APIpassword"
+    }       
+
+]
