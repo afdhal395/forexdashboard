@@ -5,6 +5,12 @@ if (!file_exists('accounts.json')) {
 }
 $file = file_get_contents('accounts.json');
 $accounts = json_decode($file, true);
+
+//function to set price float precision
+function formatfloat($input, $precision){
+  $result = number_format($input,$precision,".","");
+  return $result;
+}
 ?>
 
 <!doctype html>
@@ -25,104 +31,129 @@ $accounts = json_decode($file, true);
       </div>
     
         <?php
-          $account = new Api;
-          $account->setLogin($accounts['0']['login']);
-          $account->setPassword($accounts['0']['password']);
-          $account->requestToken();
-          $accountStatus = $account->getBalanceStatus();
-          $accountStatus = json_decode($accountStatus, true); 
+          // Begin iterate each content in accounts.json
+          for ($index=0; $index < count($accounts); $index++) { 
+            
+            $account = new Api;
+            $account->setLogin($accounts[$index]['login']);
+            $account->setPassword($accounts[$index]['password']);
+            $account->requestToken();
 
-          // store data into new variable
-          $accountOwner = $accounts['name'];
-          $accountNumber = $accountStatus['Login'];
-          $accountBalance = $accountStatus['Balance'];
-          $accountEquity = $accountStatus['Equity'];
+            // Request Account Balance
+            $accountStatus = $account->getBalanceStatus();
+            $accountStatus = json_decode($accountStatus, true); 
+            
+            // Store Account data into variables
+            $accountOwner = $accounts[$index]['name'];
+            $accountNumber = $accountStatus['Login'];
+            $accountBalance = $accountStatus['Balance'];
+            $accountEquity = $accountStatus['Equity'];
+            
+            //Account Statistics Calculation
+            $accountFloat = $accountEquity - $accountBalance;
+            $accountRisk = round($accountFloat / $accountBalance * 100,2);
 
-          //Calculation
-          $accountFloat = $accountEquity - $accountBalance;
-          $accountRisk = round($accountFloat / $accountBalance * 100,2);
-          echo "<pre>";
-          //print_r($trade_arr);
-          echo "</pre>";
-        ?>
-
-      <div class="card">
-        <div class="card-header">
-          <?php
-            echo $accountOwner." Account Number: ".$accountNumber.". Balance: $".$accountBalance.". Equity: $".$accountEquity.". Float: $".$accountFloat.". Risk: ".$accountRisk."%.";
-          ?>
-        </div>
-        <div class="card-body">
-          <h4 class="card-title">Open Trades</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Order Date</th>
-                <th>Pair</th>
-                <th>Order Type</th>
-                <th>Lot</th>
-                <th>Open Price</th>
-                <th>Current Price</th>
-                <th>S/L</th>
-                <th>T/P</th>
-                <th>Current Profit</th>
-                <th>Expected Profit</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php
-                // get Open Trades through API
-                $tradeStatus=$account->getOpenTrades();
-                $tradeStatus = json_decode($tradeStatus, true);
+            echo "<div class=\"card\">";
+            echo "<div class=\"card-header\">";
+              echo "Owner: ".$accountOwner." Account Number: ".$accountNumber."<br>"; 
+              echo "Balance: $".$accountBalance.". Equity: $".$accountEquity."<br>";
+              echo "Float: $".$accountFloat.". Risk: ".$accountRisk."%.";
+            echo "</div>";
+        
+            echo "<div class=\"card-body\">";
+            echo "<h5 class=\"card-title\">Open Trades</h5>";
+            echo "<table class=\"table table-responsive table-sm table-hover\">";
+            echo "  <thead>";
+            echo "    <tr>";
+            echo "      <th scope=\"col\">Order Date</th>";
+            echo "      <th scope=\"col\">Pair</th>";
+            echo "      <th scope=\"col\">Order Type</th>";
+            echo "      <th scope=\"col\">Lot</th>";
+            echo "      <th scope=\"col\">Open Price</th>";
+            echo "      <th scope=\"col\">Current Price</th>";
+            echo "      <th scope=\"col\">S/L</th>";
+            echo "      <th scope=\"col\">T/P</th>";
+            echo "      <th scope=\"col\">Current Profit</th>";
+            echo "      <th scope=\"col\">Expected Profit</th>";
+            echo "    </tr>";
+            echo "  </thead>";
+            echo "  <tbody>";
                 
-                $sum = 0; //variable init for total expected profit on trades closing
+            // Request Open Trades through API
+            $tradeStatus = $account->getOpenTrades();
+            $tradeStatus = json_decode($tradeStatus, true);
+            echo "<pre>";
+            //var_dump($tradeStatus);
+            echo "</pre>";
+            $sum = 0; //initialize variable to store net expected profit            
 
-                for ($index=0; $index < count($tradeStatus); $index++) { 
-                  echo "<tr>";
-                  echo "<td scope='row'>".$tradeStatus[$index]['OpenTime']."</td>";
-                  echo "<td>".$tradeStatus[$index]['Symbol']."</td>";
+            // Begin iterate each trade data
+            for ($tradeIndex=0; $tradeIndex < count($tradeStatus); $tradeIndex++) {   
+              
 
-                  if ($tradeStatus[$index]['Type'] == "1") {
-                    $tradeType = "BUY";
-                  } elseif ($tradeStatus[$index]['Type'] == "2") {
-                    $tradeType = "SELL";
-                  }
+              //Store Trades data into variables
+              $tradeOpenTime = $tradeStatus[$tradeIndex]['OpenTime'];
+              $tradeSymbol = $tradeStatus[$tradeIndex]['Symbol'];
+              $tradeTypeInteger = $tradeStatus[$tradeIndex]['Type']; // return integer 1 for BUY trade, integer 2 for SELL trade
+              
+              //change $tradeTypeInteger to $tradeType
+              if ($tradeTypeInteger == "1") {
+                $tradeType = "BUY";
+              } elseif ($tradeTypeInteger == "2") {
+                $tradeType = "SELL";
+              }
+                  
 
-                  echo "<td>".$tradeType."</td>";
-                  echo "<td>".$tradeStatus[$index]['Volume']."</td>";
-                  echo "<td>".number_format($tradeStatus[$index]['OpenPrice'],4,".","")."</td>"; //convert to 4 float precision
-                  echo "<td>".number_format($tradeStatus[$index]['CurrentPrice'],4,".","")."</td>"; //convert to 4 float precision
-                  echo "<td>".number_format($tradeStatus[$index]['SL'],4,".","")."</td>"; //convert to 4 float precision
-                  echo "<td>".number_format($tradeStatus[$index]['TP'],4,".","")."</td>"; //convert to 4 float precision
-                  echo "<td>".number_format($tradeStatus[$index]['Profit'],2,".","")."</td>"; //convert to 2 float precision
-
-                  //check for how the expected profit will be calculated
-                  if ($tradeStatus[$index]['Type']=="1") { //1 = Buy, 2 = Sell
-                    // Calculate T/P - OpenPrice
-                    $pip = round($tradeStatus[$index]['TP']-$tradeStatus[$index]['OpenPrice'],4)*10000;
-                    $expectedProfit = number_format($pip * $tradeStatus[$index]['Volume'],2,".",""); //convert to 2 float precision
-                    
-                  } else {
-                    // Calculate OpenPrice - TP
-                    ($pip = round($tradeStatus[$index]['OpenPrice']-$tradeStatus[$index]['TP'],4)*10000)." ";
-                    $expectedProfit = str_pad($pip * $tradeStatus[$index]['Volume'],5,"0",STR_PAD_RIGHT);
-                    $expectedProfit = number_format($pip * $tradeStatus[$index]['Volume'],2,".",""); //convert to 2 float precision
-                  }
-
-                  echo "<td>".$expectedProfit."</td>";
-                  echo "</tr>";
+              $tradeVolume = $tradeStatus[$tradeIndex]['Volume'];
+              $tradeOpenPrice = formatfloat($tradeStatus[$tradeIndex]['OpenPrice'],4);
+              $tradeCurrentPrice = formatfloat($tradeStatus[$tradeIndex]['CurrentPrice'],4);
+              $tradeSL = formatfloat($tradeStatus[$tradeIndex]['SL'],4);
+              $tradeTP = formatfloat($tradeStatus[$tradeIndex]['TP'],4);
+              $tradeCurrentProfit = formatfloat($tradeStatus[$tradeIndex]['Profit'],2);
+                  
+                  
+              //Trade Statistics Calculation
+              // identify how the expected profit will be calculated
+              if ($tradeType == "BUY") {
+                // calculate T/P - OpenPrice
+                $pip = round($tradeTP - $tradeOpenPrice,4)*10000;
+                $calc = $pip * $tradeVolume;
+                $expectedProfit = formatfloat($calc,2);
+              } elseif ($tradeType == "SELL") {
+                //calculate OpenPrice - T/P
+                $pip = round($tradeOpenPrice - $tradeTP,4)*10000;
+                $calc = $pip * $tradeVolume;
+                $expectedProfit = formatfloat($calc,2);
+              }
+                  
+              $sum += $expectedProfit; //store each trade's expected profit for net expected profit calculation
+              // echo all trade data
+              echo "<tr>";
+              echo "<td scope='row'>".$tradeOpenTime."</td>";
+              echo "<td>".$tradeSymbol."</td>";
+              echo "<td>".$tradeType."</td>";
+              echo "<td>".$tradeVolume."</td>";
+              echo "<td>".$tradeOpenPrice."</td>"; 
+              echo "<td>".$tradeCurrentPrice."</td>";
+              echo "<td>".$tradeSL."</td>";
+              echo "<td>".$tradeTP."</td>";
+              echo "<td>".$tradeCurrentProfit."</td>";
+              echo "<td>".$expectedProfit."</td>";
+              echo "</tr>";
+            } // End iterate each trade data  
           
-                  $sum += $expectedProfit; //store result into total expected result
+          echo "  </tbody>";
+          echo "</table>";
+          echo "</div>";
+          echo "<div class=\"card-footer\">";
+          echo "Expected Profit on Trade Closing: $".$sum;
+          echo "  </div>";
+          echo "</div>";
 
-                }
-              ?>
-            </tbody>
-          </table>
-        </div>
-        <div class="card-footer">
-          Expected Profit on Trade Closing: <?php echo "$".$sum;?>
-        </div>
-      </div>
+          echo "&nbsp";
+          echo "&nbsp";
+          } // End iterate each content in accounts.json
+          ?>
     </div>
 
     <!-- Optional JavaScript -->
