@@ -46,12 +46,12 @@ function formatfloat($input, $precision){
             // Store Account data into variables
             $accountOwner = $accounts[$index]['name'];
             $accountNumber = $accountStatus['Login'];
-            $accountBalance = $accountStatus['Balance'];
-            $accountEquity = $accountStatus['Equity'];
+            $accountBalance = formatfloat($accountStatus['Balance'],2);
+            $accountEquity = formatfloat($accountStatus['Equity'],2);
             
             //Account Statistics Calculation
-            $accountFloat = $accountEquity - $accountBalance;
-            $accountRisk = round($accountFloat / $accountBalance * 100,2);
+            $accountFloat = formatfloat($accountEquity - $accountBalance,2);
+            $accountRisk = formatfloat($accountFloat / $accountBalance * 100,2);
 
             echo "<div class=\"card\">";
             echo "<div class=\"card-header\">";
