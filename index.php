@@ -1,4 +1,5 @@
 <?php
+require_once('env.php');
 require_once($class."/Indicator.php");
 require_once($class."/Chart.php");
 ?>
