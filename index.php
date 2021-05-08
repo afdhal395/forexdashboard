@@ -1,7 +1,6 @@
-<?php 
-require 'class/class.indicator.php';
-require 'class/class.chart.php';
-
+<?php
+require_once($class."/Indicator.php");
+require_once($class."/Chart.php");
 ?>
 <!doctype html>
 <html lang="en">

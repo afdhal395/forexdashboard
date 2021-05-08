@@ -1,5 +1,6 @@
 <?php
-include('class/class.api.php');
+require_once('../env.php');
+require_once($class.'/CabinetApi.php');
 if (!file_exists('accounts.json')) {
   die('File accounts.json not found. Please rename accounts-sample.json to accounts.json and insert required data inside it.');
 }
