@@ -71,7 +71,8 @@ class Api
   {
     $apiMethodUrl = 'client/RequestOpenTrades/'; #possibly Must be Changed
     $parameters = $this->login; #possibly Must be Changed. Depends on the method param
-    $ch = curl_init('https://client-api.instaforex.com/'.$apiMethodUrl.$parameters);
+    $limit = 100;
+    $ch = curl_init('https://client-api.instaforex.com/'.$apiMethodUrl.$parameters.'?limit='.$limit);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # Turn it ON to get result to the variable
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('passkey: '.$this->token));
