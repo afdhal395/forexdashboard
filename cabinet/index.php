@@ -7,10 +7,61 @@ if (!file_exists('accounts.json')) {
 $file = file_get_contents('accounts.json');
 $accounts = json_decode($file, true);
 
+//function to check whether the pair has JPY or not
+function checkYen($pair) {
+  if (substr($pair,0,3) == "JPY" || substr($pair,3,5) == "JPY") {
+    return true;
+  }
+}
+
 //function to set price float precision
-function formatfloat($input, $precision){
-  $result = number_format($input,$precision,".","");
+function formatfloat($pair, $price){
+  if (checkYen($pair) == true) {
+    $result = number_format($price,2,".", "");
+    return $result;
+  } else
+  $result = number_format($price,4,".","");
   return $result;
+}
+
+//function to calculate profit
+function calculateProfit($pair, $tradeType, $openPrice, $profitPrice, $lotSize) {
+  if ($tradeType == "BUY") {
+    //TP - OPEN = pips
+    if (checkYen($pair) == true && $profitPrice > 0) {  //check JPY pair and has profit price set
+      $pips = ($profitPrice - $openPrice) * 100;
+      $result = $pips * $lotSize;
+      return $result;
+    } elseif (checkYen($pair) == true && $profitPrice == 0) { //check JPY pair but no profit price is set
+      $result = number_format(0, 2, ".", "");
+      return $result;
+    } elseif ($profitPrice > 0) { //check if profit price is set
+      $pips = ($profitPrice - $openPrice) * 10000;
+      $result = $pips * $lotSize;
+      return $result;
+    } else {  //no profit price was set
+      $result = 0;
+      return $result;
+    }
+
+  } elseif ($tradeType == "SELL") {
+    if (checkYen($pair) == true && $profitPrice > 0) {
+      $pips = ($openPrice - $profitPrice) * 100;
+      $result = $pips * $lotSize;
+      return $result;
+    } elseif (checkYen($pair) == true && $profitPrice == 0) {
+      $pips = ($openPrice - $profitPrice) * 100;
+      $result = $pips * $lotSize;
+      return $result;
+    } elseif ($profitPrice > 0) {
+      $pips = ($openPrice - $profitPrice) * 10000;
+      $result = $pips * $lotSize;
+      return $result;
+    } else {
+      $result = 0;
+      return $result;
+    }
+  }
 }
 ?>
 
@@ -48,12 +99,12 @@ function formatfloat($input, $precision){
             // Store Account data into variables
             $accountOwner = $accounts[$index]['name'];
             $accountNumber = $accountStatus['Login'];
-            $accountBalance = formatfloat($accountStatus['Balance'],2);
-            $accountEquity = formatfloat($accountStatus['Equity'],2);
+            $accountBalance = number_format($accountStatus['Balance'], 2);
+            $accountEquity = number_format($accountStatus['Equity'], 2);
             
             //Account Statistics Calculation
-            $accountFloat = formatfloat($accountEquity - $accountBalance,2);
-            $accountRisk = formatfloat($accountFloat / $accountBalance * 100,2);
+            $accountFloat = number_format($accountEquity - $accountBalance,2);
+            $accountRisk = number_format($accountFloat / $accountBalance * 100,2);
 
             echo "<div class=\"card\">";
             echo "<div class=\"card-header\">";
@@ -92,7 +143,6 @@ function formatfloat($input, $precision){
             // Begin iterate each trade data
             for ($tradeIndex=0; $tradeIndex < count($tradeStatus); $tradeIndex++) {   
               
-
               //Store Trades data into variables
               $tradeOpenTime = $tradeStatus[$tradeIndex]['OpenTime'];
               $tradeSymbol = $tradeStatus[$tradeIndex]['Symbol'];
@@ -105,28 +155,13 @@ function formatfloat($input, $precision){
                 $tradeType = "SELL";
               }
                   
-
               $tradeVolume = $tradeStatus[$tradeIndex]['Volume'];
-              $tradeOpenPrice = formatfloat($tradeStatus[$tradeIndex]['OpenPrice'],4);
-              $tradeCurrentPrice = formatfloat($tradeStatus[$tradeIndex]['CurrentPrice'],4);
-              $tradeSL = formatfloat($tradeStatus[$tradeIndex]['SL'],4);
-              $tradeTP = formatfloat($tradeStatus[$tradeIndex]['TP'],4);
-              $tradeCurrentProfit = formatfloat($tradeStatus[$tradeIndex]['Profit'],2);
-                  
-                  
-              //Trade Statistics Calculation
-              // identify how the expected profit will be calculated
-              if ($tradeType == "BUY") {
-                // calculate T/P - OpenPrice
-                $pip = round($tradeTP - $tradeOpenPrice,4)*10000;
-                $calc = $pip * $tradeVolume;
-                $expectedProfit = formatfloat($calc,2);
-              } elseif ($tradeType == "SELL") {
-                //calculate OpenPrice - T/P
-                $pip = round($tradeOpenPrice - $tradeTP,4)*10000;
-                $calc = $pip * $tradeVolume;
-                $expectedProfit = formatfloat($calc,2);
-              }
+              $tradeOpenPrice = formatfloat($tradeStatus[$tradeIndex]['Symbol'], $tradeStatus[$tradeIndex]['OpenPrice']);
+              $tradeCurrentPrice = formatfloat($tradeStatus[$tradeIndex]['Symbol'], $tradeStatus[$tradeIndex]['CurrentPrice']);
+              $tradeSL = formatfloat($tradeStatus[$tradeIndex]['Symbol'], $tradeStatus[$tradeIndex]['SL']);
+              $tradeTP = formatfloat($tradeStatus[$tradeIndex]['Symbol'], $tradeStatus[$tradeIndex]['TP']);
+              $tradeCurrentProfit = number_format($tradeStatus[$tradeIndex]['Profit'], 2);
+              $expectedProfit = number_format(calculateProfit($tradeSymbol, $tradeType, $tradeOpenPrice, $tradeTP, $tradeVolume), 2, ".", "");
                   
               $sum += $expectedProfit; //store each trade's expected profit for net expected profit calculation
               // echo all trade data
