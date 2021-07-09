@@ -99,8 +99,8 @@ function calculateProfit($pair, $tradeType, $openPrice, $profitPrice, $lotSize) 
             // Store Account data into variables
             $accountOwner = $accounts[$index]['name'];
             $accountNumber = $accountStatus['Login'];
-            $accountBalance = number_format($accountStatus['Balance'], 2);
-            $accountEquity = number_format($accountStatus['Equity'], 2);
+            $accountBalance = number_format($accountStatus['Balance'], 2, ".", "");
+            $accountEquity = number_format($accountStatus['Equity'], 2, ".", "");
             
             //Account Statistics Calculation
             $accountFloat = number_format($accountEquity - $accountBalance,2);
